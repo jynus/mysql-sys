@@ -273,7 +273,7 @@ BEGIN
     UNION ALL
     SELECT 'Datadir' AS 'Name', @@global.datadir AS 'Value'
     UNION ALL
-    SELECT 'Server UUID' AS 'Name', @@global.server_uuid AS 'Value'
+    SELECT 'Server UUID' AS 'Name', @@global.server_id AS 'Value'
     UNION ALL
     SELECT REPEAT('-', 23) AS 'Name', v_banner AS 'Value'
     UNION ALL
@@ -309,8 +309,8 @@ BEGIN
                                    'NO'
                                ),
         v_has_replication    = /*!50707 IF(v_has_ps_replication = 'YES', IF((SELECT COUNT(*) FROM performance_schema.replication_connection_status) > 0, 'YES', 'NO'),*/
-                                  IF(@@master_info_repository = 'TABLE', IF((SELECT COUNT(*) FROM mysql.slave_master_info) > 0, 'YES', 'NO'),
-                                     IF(@@relay_log_info_repository = 'TABLE', IF((SELECT COUNT(*) FROM mysql.slave_relay_log_info) > 0, 'YES', 'NO'),
+                                  IF(false /*@@master_info_repository = 'TABLE'*/, IF((SELECT COUNT(*) FROM mysql.slave_master_info) > 0, 'YES', 'NO'),
+                                     IF(false /*@@relay_log_info_repository = 'TABLE'*/, IF((SELECT COUNT(*) FROM mysql.slave_relay_log_info) > 0, 'YES', 'NO'),
                                         'MAYBE'))/*!50707 )*/,
         v_has_metrics        = IF(v_has_ps = 'YES' OR (sys.version_major() = 5 AND sys.version_minor() = 6), 'YES', 'NO'),
         v_has_ps_vars        = 'NO';
@@ -578,7 +578,7 @@ BEGIN
             SELECT * FROM performance_schema.replication_applier_configuration ORDER BY CHANNEL_NAME;
         END IF;
 
-        IF (@@master_info_repository = 'TABLE') THEN
+        IF (false /*@@master_info_repository = 'TABLE'*/) THEN
             SELECT 'Replication - Master Info Repository Configuration' AS 'The following output is:';
             -- Can't just do SELECT *  as the password may be present in plain text
             -- Don't include binary log file and position as that will be determined in each iteration as well
@@ -589,7 +589,7 @@ BEGIN
               FROM mysql.slave_master_info/*!50706 ORDER BY Channel_name*/;
         END IF;
 
-        IF (@@relay_log_info_repository = 'TABLE') THEN
+        IF (false /*@@relay_log_info_repository = 'TABLE'*/) THEN
             SELECT 'Replication - Relay Log Repository Configuration' AS 'The following output is:';
             SELECT /*!50706 Channel_name, */Sql_delay, Number_of_workers, Id
               FROM mysql.slave_relay_log_info/*!50706 ORDER BY Channel_name*/;
@@ -712,12 +712,12 @@ BEGIN
                 SELECT * FROM performance_schema.replication_applier_status_by_worker ORDER BY CHANNEL_NAME, WORKER_ID;
             END IF;
 
-            IF (@@master_info_repository = 'TABLE') THEN
+            IF (false /*@@master_info_repository = 'TABLE'*/) THEN
                 SELECT 'Replication - Master Log Status' AS 'The following output is:';
                 SELECT Master_log_name, Master_log_pos FROM mysql.slave_master_info;
             END IF;
 
-            IF (@@relay_log_info_repository = 'TABLE') THEN
+            IF (false /*@@relay_log_info_repository = 'TABLE'*/) THEN
                 SELECT 'Replication - Relay Log Status' AS 'The following output is:';
                 SELECT sys.format_path(Relay_log_name) AS Relay_log_name, Relay_log_pos, Master_log_name, Master_log_pos FROM mysql.slave_relay_log_info;
 
